@@ -8,6 +8,7 @@ import (
 	"gorm.io/driver/postgres"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
+	"gorm.io/gorm/logger"
 )
 
 type Config struct {
@@ -33,6 +34,10 @@ func (conf *Config) GetDatabaseConnection() *gorm.DB {
 	var err error
 	var db *gorm.DB
 
+	logConfig := &gorm.Config{
+		Logger: logger.Default.LogMode(logger.Silent),
+	}
+
 	switch conf.DBDriver {
 	case "mysql":
 		dsn := fmt.Sprintf(
@@ -44,12 +49,12 @@ func (conf *Config) GetDatabaseConnection() *gorm.DB {
 			conf.DBMySQLName,
 		)
 
-		db, err = gorm.Open(mysql.Open(dsn))
+		db, err = gorm.Open(mysql.Open(dsn), logConfig)
 		if err != nil {
 			log.Fatal(err)
 		}
 	case "sqlite":
-		db, err = gorm.Open(sqlite.Open(conf.DBSQLiteName))
+		db, err = gorm.Open(sqlite.Open(conf.DBSQLiteName), logConfig)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -63,7 +68,7 @@ func (conf *Config) GetDatabaseConnection() *gorm.DB {
 			conf.DBPostgreSQLName,
 		)
 
-		db, err = gorm.Open(postgres.Open(dsn))
+		db, err = gorm.Open(postgres.Open(dsn), logConfig)
 		if err != nil {
 			log.Fatal(err)
 		}
